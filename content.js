@@ -75,6 +75,24 @@ bot.addEventListener("click", () => {
   panel.style.display = panel.style.display === "none" ? "block" : "none";
 });
 
+/* ✅ CLEAN JOB EXTRACTION */
+function getJobText() {
+  const selectors = [
+    "[data-testid='jobsearch-jobDescriptionText']",
+    "#jobDescriptionText",
+    ".jobsearch-jobDescriptionText"
+  ];
+
+  for (let sel of selectors) {
+    const el = document.querySelector(sel);
+    if (el && el.innerText.length > 200) {
+      return el.innerText.substring(0, 2000);
+    }
+  }
+
+  return document.body.innerText.substring(0, 2000);
+}
+
 /* BUTTONS */
 panel.addEventListener("click", async (e) => {
   const status = document.getElementById("status");
@@ -97,7 +115,7 @@ panel.addEventListener("click", async (e) => {
 
     status.innerText = "Scanning...";
 
-    const pageText = document.body.innerText.substring(0, 3000);
+    const jobText = getJobText();
 
     debug.innerText = `CV length: ${cvText.length}`;
 
@@ -109,7 +127,7 @@ panel.addEventListener("click", async (e) => {
         },
         body: JSON.stringify({
           cv_text: cvText,
-          job_description: pageText
+          job_description: jobText
         })
       });
 
