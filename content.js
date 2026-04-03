@@ -11,7 +11,7 @@ bot.style.zIndex = "999999";
 bot.style.cursor = "grab";
 bot.style.animation = "float 3s ease-in-out infinite";
 
-/* FLOAT ANIMATION */
+/* STYLE */
 const style = document.createElement("style");
 style.innerHTML = `
 @keyframes float {
@@ -49,15 +49,46 @@ document.head.appendChild(style);
 const panel = document.createElement("div");
 panel.className = "dijo-panel";
 panel.style.display = "none";
+
 panel.innerHTML = `
   <div>🤖 Hi, I’m Dijo</div>
-  <div style="margin-top:8px;">Ready to help you apply</div>
-  <button class="dijo-btn">Scan this job</button>
+  <div id="status" style="margin-top:8px;">Ready to scan this job</div>
+  <button id="scanBtn" class="dijo-btn">Scan this job</button>
 `;
 
-/* TOGGLE PANEL */
+/* TOGGLE */
 bot.addEventListener("click", () => {
   panel.style.display = panel.style.display === "none" ? "block" : "none";
+});
+
+/* SCAN BUTTON */
+panel.addEventListener("click", async (e) => {
+  if (e.target.id === "scanBtn") {
+    const status = document.getElementById("status");
+    status.innerText = "Scanning job...";
+
+    const pageText = document.body.innerText.substring(0, 3000);
+
+    try {
+      const res = await fetch("https://impactgrid-dijo-api.onrender.com/ai/match", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          cv_text: "I am a customer service assistant with experience in retail and communication skills", // TEMP CV
+          job_description: pageText
+        })
+      });
+
+      const data = await res.json();
+
+      status.innerText = `Match: ${data.score}%`;
+
+    } catch (err) {
+      status.innerText = "Error scanning job";
+    }
+  }
 });
 
 /* DRAG */
