@@ -75,22 +75,41 @@ bot.addEventListener("click", () => {
   panel.style.display = panel.style.display === "none" ? "block" : "none";
 });
 
-/* ✅ CLEAN JOB EXTRACTION */
+/* 🔥 STRONG JOB EXTRACTION (FIXED) */
 function getJobText() {
-  const selectors = [
+  let text = "";
+
+  // Title
+  const title = document.querySelector("h1");
+  if (title) text += "TITLE: " + title.innerText + "\n\n";
+
+  // Company
+  const company =
+    document.querySelector("[data-testid='inlineHeader-companyName']") ||
+    document.querySelector(".jobsearch-CompanyInfoContainer");
+  if (company) text += "COMPANY: " + company.innerText + "\n\n";
+
+  // Description (multiple attempts)
+  const descSelectors = [
     "[data-testid='jobsearch-jobDescriptionText']",
     "#jobDescriptionText",
     ".jobsearch-jobDescriptionText"
   ];
 
-  for (let sel of selectors) {
+  for (let sel of descSelectors) {
     const el = document.querySelector(sel);
     if (el && el.innerText.length > 200) {
-      return el.innerText.substring(0, 2000);
+      text += "DESCRIPTION:\n" + el.innerText;
+      break;
     }
   }
 
-  return document.body.innerText.substring(0, 2000);
+  // Fallback (but cleaner)
+  if (text.length < 200) {
+    text = document.body.innerText;
+  }
+
+  return text.substring(0, 2500);
 }
 
 /* BUTTONS */
@@ -117,7 +136,7 @@ panel.addEventListener("click", async (e) => {
 
     const jobText = getJobText();
 
-    debug.innerText = `CV length: ${cvText.length}`;
+    debug.innerText = `CV length: ${cvText.length} | Job length: ${jobText.length}`;
 
     try {
       const res = await fetch("https://impactgrid-dijo-api.onrender.com/ai/match", {
