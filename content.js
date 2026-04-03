@@ -56,17 +56,18 @@ const panel = document.createElement("div");
 panel.className = "dijo-panel";
 panel.style.display = "none";
 
-/* LOAD SAVED CV */
 let savedCV = localStorage.getItem("dijo_cv") || "";
 
 panel.innerHTML = `
   <div>🤖 Hi, I’m Dijo</div>
   <div id="status" style="margin-top:8px;">Paste your CV once</div>
 
-  <textarea id="cvInput" rows="4" placeholder="Paste your CV here...">${savedCV}</textarea>
+  <textarea id="cvInput" rows="4">${savedCV}</textarea>
 
   <button id="saveCV" class="dijo-btn">Save CV</button>
   <button id="scanBtn" class="dijo-btn">Scan this job</button>
+
+  <div id="debug" style="margin-top:10px; font-size:12px; color:#aaa;"></div>
 `;
 
 /* TOGGLE */
@@ -74,17 +75,13 @@ bot.addEventListener("click", () => {
   panel.style.display = panel.style.display === "none" ? "block" : "none";
 });
 
-/* BUTTON HANDLING */
+/* BUTTONS */
 panel.addEventListener("click", async (e) => {
   const status = document.getElementById("status");
+  const debug = document.getElementById("debug");
 
   if (e.target.id === "saveCV") {
     const cvText = document.getElementById("cvInput").value;
-
-    if (!cvText) {
-      status.innerText = "Please paste your CV";
-      return;
-    }
 
     localStorage.setItem("dijo_cv", cvText);
     status.innerText = "CV saved ✅";
@@ -94,13 +91,15 @@ panel.addEventListener("click", async (e) => {
     const cvText = localStorage.getItem("dijo_cv");
 
     if (!cvText) {
-      status.innerText = "Please save your CV first";
+      status.innerText = "No CV saved";
       return;
     }
 
-    status.innerText = "Scanning job...";
+    status.innerText = "Scanning...";
 
     const pageText = document.body.innerText.substring(0, 3000);
+
+    debug.innerText = `CV length: ${cvText.length}`;
 
     try {
       const res = await fetch("https://impactgrid-dijo-api.onrender.com/ai/match", {
@@ -117,9 +116,10 @@ panel.addEventListener("click", async (e) => {
       const data = await res.json();
 
       status.innerText = `Match: ${data.score}%`;
+      debug.innerText += ` | Reason: ${data.reason}`;
 
     } catch (err) {
-      status.innerText = "Error scanning job";
+      status.innerText = "Error";
     }
   }
 });
