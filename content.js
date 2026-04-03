@@ -42,6 +42,12 @@ style.innerHTML = `
   border-radius: 8px;
   cursor: pointer;
 }
+textarea {
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 8px;
+  padding: 6px;
+}
 `;
 document.head.appendChild(style);
 
@@ -50,9 +56,16 @@ const panel = document.createElement("div");
 panel.className = "dijo-panel";
 panel.style.display = "none";
 
+/* LOAD SAVED CV */
+let savedCV = localStorage.getItem("dijo_cv") || "";
+
 panel.innerHTML = `
   <div>🤖 Hi, I’m Dijo</div>
-  <div id="status" style="margin-top:8px;">Ready to scan this job</div>
+  <div id="status" style="margin-top:8px;">Paste your CV once</div>
+
+  <textarea id="cvInput" rows="4" placeholder="Paste your CV here...">${savedCV}</textarea>
+
+  <button id="saveCV" class="dijo-btn">Save CV</button>
   <button id="scanBtn" class="dijo-btn">Scan this job</button>
 `;
 
@@ -61,10 +74,30 @@ bot.addEventListener("click", () => {
   panel.style.display = panel.style.display === "none" ? "block" : "none";
 });
 
-/* SCAN BUTTON */
+/* BUTTON HANDLING */
 panel.addEventListener("click", async (e) => {
+  const status = document.getElementById("status");
+
+  if (e.target.id === "saveCV") {
+    const cvText = document.getElementById("cvInput").value;
+
+    if (!cvText) {
+      status.innerText = "Please paste your CV";
+      return;
+    }
+
+    localStorage.setItem("dijo_cv", cvText);
+    status.innerText = "CV saved ✅";
+  }
+
   if (e.target.id === "scanBtn") {
-    const status = document.getElementById("status");
+    const cvText = localStorage.getItem("dijo_cv");
+
+    if (!cvText) {
+      status.innerText = "Please save your CV first";
+      return;
+    }
+
     status.innerText = "Scanning job...";
 
     const pageText = document.body.innerText.substring(0, 3000);
@@ -76,7 +109,7 @@ panel.addEventListener("click", async (e) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          cv_text: "I am a customer service assistant with experience in retail and communication skills", // TEMP CV
+          cv_text: cvText,
           job_description: pageText
         })
       });
