@@ -2,7 +2,10 @@
   "manifest_version": 3,
   "name": "Dijo AI Assistant",
   "version": "1.0",
-  "permissions": ["activeTab", "scripting"],
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "https://impactgrid-dijo-api.onrender.com/*"
+  ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
